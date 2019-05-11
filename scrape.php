@@ -9,34 +9,49 @@ use Scrape\Libs\Parser;
 class Scrape 
 {	
 	var $baseUrl = "https://find-an-architect.architecture.com/";
-	var $url = "FAAPractices.aspx?display=50";
+	var $url = "FAAPractices.aspx?display=50&page=73";
+	var $counter;
 	protected $utility;
 
 	function __construct(Utility $utility)
 	{
 		$this->utility = $utility;
+		$this->counter = 0;
 	}
 
 
 	public function scrape(){
-		$homeUrl = $this->baseUrl.$this->url;
-		$data = $this->utility->getContent($homeUrl);
-		return $this->parseData($data);
+		$this->url = $this->baseUrl.$this->url;
+		$getData = [];
+		$continue = TRUE;
+		while ($continue) {
+			$data = $this->utility->getContent($this->url);
+			$getData[] = $this->parseData($data);
+			$doc = phpQuery::newDocumentHTML($data);
+			$nextPage = $doc->find('.sys_flickrpager > .sys_navigation span.sys_navigationnext > a')->attr('href');
+			if(strrpos($nextPage,"&page=")){
+				$cleanUrl = preg_replace("/\/FindAnArchitect\//","",$nextPage);
+				$this->url = $this->baseUrl.$cleanUrl;
+			}else{
+				break;
+			}
+		}
+
+		return $this->utility->writeToFile($getData);
+
 	}
 
 	public function parseData($markup){
 		$doc = phpQuery::newDocumentHTML($markup);
 		$getItems =  $doc->find( '.listingItem' );
 		$result  = array();
-		$counter = 0;
 		foreach ( $getItems as $offer )
 		{
 			$o = pq($offer);
-			$result[$counter] = Parser::parse($o);
-			$result[$counter]['services'] = $this->services($o);
-			$counter++;
+			$result[$this->counter] = Parser::parse($o);
+			$result[$this->counter]['services'] = $this->services($o);
+			$this->counter++;
 		}
-
 		return $result;
 	}
 
@@ -51,13 +66,9 @@ class Scrape
 
 
 $scrape = new Scrape(new Utility);
-try {
-	$request = $scrape->scrape();
-	echo '<pre>' . print_r($request, true ) . '</pre>';
-} catch (InvalidHttpException $e) {
-	return ["status"=>$e->getCode(),"message"=> $e->getMessage()];
-}
-
-return $request;
+$request = $scrape->scrape();
+echo ($request) ? "Added Data To File" : "Failed Adding Data To File";
+//echo '<pre>' . print_r($request, true ) . '</pre>';
+exit(0);
 
 ?>

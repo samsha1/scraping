@@ -36,12 +36,33 @@ class ParserTest extends TestCase{
 
     }
 
-    public function test_getImageSource_should_return_image_location(){
-        $file =  file_get_contents(__DIR__."/../mock/test.html");
-        $this->call->setParser($file);
-        $find = $this->call->getImageSource('.listingItem-thumbnail img');
-        $this->assertEquals("/home/abc.jpeg",$find);
+    public function test_validateTelephone(){
+        $invalidNumber = "723#@gyd 5325$6362";
+        $valid = $this->call->validateTelephone($invalidNumber);
+        $this->assertEquals("723 532 56362",$valid);
     }
+
+    public function test_validateEmail(){
+        $validEmail = "sam@abc.com";
+        $valid = $this->call->validateEmail($validEmail);
+        $this->assertEquals($validEmail,$valid);
+        $invalid = ".ds#ghjsdb@f76.8fdsf798";
+        $valid = $this->call->validateEmail($invalid);
+        $this->assertEquals("N/A",$valid);
+
+    }
+
+    public function test_filter_Data_should_assign_na_on_empty_key_value(){
+        $arr = [
+            "name" => "sam",
+            "age" => null
+        ];
+        $filter = $this->call->filter($arr);
+        $this->assertEquals($filter['age'],"N/A");
+        $this->assertEquals($filter['name'],$arr['name']);
+
+    }
+
 
 
 

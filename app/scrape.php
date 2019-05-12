@@ -1,8 +1,7 @@
 <?php
 namespace App\Scrapper;
 
-require_once __DIR__ .'/libs/utility.php';
-require_once __DIR__ .'/libs/parser.php';
+require_once __DIR__ .'/../libs/parser.php';
 
 use Scrape\Libs\Utility;
 use Scrape\Libs\Parser;
@@ -11,7 +10,7 @@ use Scrape\Exceptions\InvalidHttpException;
 class Scrape 
 {	
 	var $baseUrl = "https://find-an-architect.architecture.com/";
-	var $url = "FAAPractices.aspx?display=50";
+	var $url = "FAAPractices.aspx?display=50&page=76";
 	var $counter;
 	protected $utility;
 
@@ -57,8 +56,15 @@ class Scrape
 		{
 			$o = pq($offer);
 			$parser->setParser($o);
-			$result[$this->counter] = $parser->parse();
+			$result[$this->counter]['name'] = $parser->findText('h3 > a');
+			$result[$this->counter]['address1'] = $parser->findText('.listingItem-details > .pageMeta > .pageMeta-col > .address');
+			$result[$this->counter][ 'phone' ]    = $parser->validateTelephone($parser->findText('.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item:eq(1)' ));
+			$result[$this->counter][ 'email' ] = $parser->validateEmail($parser->findText('.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .faaemail' ));
+			$result[$this->counter][ 'website' ]  = $parser->findText( '.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .exLink' );
+			$result[$this->counter][ 'about' ]    = $parser->findText( '.listingItem-extra > .pageMeta-item > p' );
+			$result[$this->counter][ 'imageUrl' ] = $parser->getImageSource('.listingItem-thumbnail img');
 			$result[$this->counter]['services'] = $this->services($o);
+			$result[$this->counter] = $parser->filter($result[$this->counter]);
 			$this->counter++;
 		}
 		return $result;
@@ -78,12 +84,5 @@ class Scrape
 		return empty($desc) ? "N/A" : $desc; 
 	}
 }
-
-
-$scrape = new Scrape(new Utility);
-$request = $scrape->scrape();
-print_r(($request) ? $request : "Failed Adding Data To File");
-//echo '<pre>' . print_r($request, true ) . '</pre>';
-exit(0);
 
 ?>

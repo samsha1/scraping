@@ -1,6 +1,7 @@
 <?php
 namespace App\Scrapper;
 
+require_once __DIR__ .'/../autoload.php';
 require_once __DIR__ .'/../libs/parser.php';
 
 use Scrape\Libs\Utility;
@@ -9,8 +10,8 @@ use Scrape\Exceptions\InvalidHttpException;
 
 class Scrape 
 {	
-	var $baseUrl = "https://find-an-architect.architecture.com/";
-	var $url = "FAAPractices.aspx?display=50&page=76";
+	var $baseUrl;
+	var $url;
 	var $counter;
 	protected $utility;
 
@@ -18,11 +19,12 @@ class Scrape
 	{
 		$this->utility = $utility;
 		$this->counter = 0;
+		$this->baseUrl = env("BASE_URL");
+		$this->url = $this->baseUrl . env("START_URL");
 	}
 
 
 	public function scrape(){
-		$this->url = $this->baseUrl.$this->url;
 		$parser = new Parser();
 		$continue = TRUE;
 		while ($continue) {

@@ -25,6 +25,10 @@ class ScrapeTest extends TestCase{
         $this->assertEquals('App\Scrapper\Scrape', \get_class($this->call));
     }
 
+    public function test_scrape(){
+        
+    }
+
 }
 
 

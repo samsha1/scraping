@@ -21,3 +21,9 @@ Output expected:
 Script to navigate through the site and write the data to a CSV file.
 CSV file with the above details.
 
+Before Running the script, configure your env.php with BASE_URL AND START_URL.
+
+Run the script with 'php scrape_job.php' command in your terminal.
+
+
+

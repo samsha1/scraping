@@ -1,5 +1,4 @@
 <?php
-require('phpQuery/phpQuery/phpQuery.php');
 require_once __DIR__ .'/libs/utility.php';
 require_once __DIR__ .'/libs/parser.php';
 
@@ -9,7 +8,7 @@ use Scrape\Libs\Parser;
 class Scrape 
 {	
 	var $baseUrl = "https://find-an-architect.architecture.com/";
-	var $url = "FAAPractices.aspx?display=50&page=73";
+	var $url = "FAAPractices.aspx?display=50&page=70";
 	var $counter;
 	protected $utility;
 
@@ -22,13 +21,14 @@ class Scrape
 
 	public function scrape(){
 		$this->url = $this->baseUrl.$this->url;
-		$getData = [];
+		$parser = new Parser();
 		$continue = TRUE;
 		while ($continue) {
 			$data = $this->utility->getContent($this->url);
-			$getData[] = $this->parseData($data);
-			$doc = phpQuery::newDocumentHTML($data);
-			$nextPage = $doc->find('.sys_flickrpager > .sys_navigation span.sys_navigationnext > a')->attr('href');
+			$parser->setParser($data);
+			$getData = $this->parseData($data);
+			$nextPage = $parser->getLink('.sys_flickrpager > .sys_navigation span.sys_navigationnext > a');
+			$this->utility->writeToFile($getData);
 			if(strrpos($nextPage,"&page=")){
 				$cleanUrl = preg_replace("/\/FindAnArchitect\//","",$nextPage);
 				$this->url = $this->baseUrl.$cleanUrl;
@@ -37,18 +37,20 @@ class Scrape
 			}
 		}
 
-		return $this->utility->writeToFile($getData);
+		return TRUE;
 
 	}
 
 	public function parseData($markup){
-		$doc = phpQuery::newDocumentHTML($markup);
-		$getItems =  $doc->find( '.listingItem' );
-		$result  = array();
+		$parser = new Parser();
+		$parser->setParser($markup);
+		$getItems =  $parser->findElement( '.listingItem' );
+		$result  = [];
 		foreach ( $getItems as $offer )
 		{
 			$o = pq($offer);
-			$result[$this->counter] = Parser::parse($o);
+			$parser->setParser($o);
+			$result[$this->counter] = $parser->parse();
 			$result[$this->counter]['services'] = $this->services($o);
 			$this->counter++;
 		}
@@ -56,11 +58,12 @@ class Scrape
 	}
 
 	public function services($o){
-		$href = $o->find( 'h3 > a' );
-		$cleanUrl = preg_replace("/\/FindAnArchitect\//",$this->baseUrl,$href->attr('href'));
+		$parser = new Parser();
+		$parser->setParser($o);
+		$cleanUrl = preg_replace("/\/FindAnArchitect\//",$this->baseUrl,$parser->getLink( 'h3 > a' ));
 		$data = $this->utility->getContent($cleanUrl);
-		$doc = phpQuery::newDocumentHTML($data);
-		return Parser::serviceParser($doc);
+		$parser->setParser($data);
+		return $parser->findText('.articleHeader > .articleHeaderTertiary span.metaBlock-data');
 	}
 }
 

@@ -7,6 +7,7 @@ use Scrape\Exceptions\InvalidHttpException;
 
 class Utility
 {
+	var $first = 0 ;
 
 	public function getContent($url = null){
 		$curl = curl_init();
@@ -22,25 +23,34 @@ class Utility
 	}
 
 	public function writeToFile($data){
-		//print_r($data);
-		$header = array("Name","Address1","Phone","Email","Website","About","Image","services");
-		$file = fopen(__DIR__ . '/../data.csv', 'w') or die("Can't create file");
-		fputcsv ($file, $header, "\t");
+		$file = $this->fileOpen();
 		foreach ($data as $key => $value) {
-			
+			$row = [];
 			foreach ($value as $key2 => $value2) {
-				$row = [];
-				foreach ($value2 as $key3 => $value3) {
-					$row[] = trim($value3);
+				
+					$row[] = trim($value2);
 				}
 				fputcsv($file, $row,';', '"');	
 			}
 
-			//print_r($row);	
-		}
-
 		fclose($file);
 		return TRUE;
+	}
+
+	private function fileOpen(){
+		if($this->first > 0){
+			$file = fopen(__DIR__ . '/../data.csv', 'a') or die("Can't create file");
+
+		}else{
+			$header = array("Name","Address","Phone","Email","Website","About","Image","services");
+			$file = fopen(__DIR__ . '/../data.csv', 'w') or die("Can't create file");
+			fputcsv ($file, $header,';');
+			$this->first = 1;
+
+		}
+
+		return $file;
+
 	}
 
 

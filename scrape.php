@@ -4,11 +4,12 @@ require_once __DIR__ .'/libs/parser.php';
 
 use Scrape\Libs\Utility;
 use Scrape\Libs\Parser;
+use Scrape\Exceptions\InvalidHttpException;
 
 class Scrape 
 {	
 	var $baseUrl = "https://find-an-architect.architecture.com/";
-	var $url = "FAAPractices.aspx?display=50&page=70";
+	var $url = "FAAPractices.aspx?display=50";
 	var $counter;
 	protected $utility;
 
@@ -24,7 +25,11 @@ class Scrape
 		$parser = new Parser();
 		$continue = TRUE;
 		while ($continue) {
-			$data = $this->utility->getContent($this->url);
+			try{
+				$data = $this->utility->getContent($this->url);
+			}catch(InvalidHttpException $e){
+				return ["status"=>$e->getCode(),"message"=> $e->getMessage()];
+			}
 			$parser->setParser($data);
 			$getData = $this->parseData($data);
 			$nextPage = $parser->getLink('.sys_flickrpager > .sys_navigation span.sys_navigationnext > a');
@@ -37,7 +42,7 @@ class Scrape
 			}
 		}
 
-		return TRUE;
+		return "Scrapping Completed";
 
 	}
 
@@ -61,7 +66,11 @@ class Scrape
 		$parser = new Parser();
 		$parser->setParser($o);
 		$cleanUrl = preg_replace("/\/FindAnArchitect\//",$this->baseUrl,$parser->getLink( 'h3 > a' ));
-		$data = $this->utility->getContent($cleanUrl);
+		try{
+			$data = $this->utility->getContent($cleanUrl);
+		}catch(InvalidHttpException $e){
+			return ["status"=>$e->getCode(),"message"=> $e->getMessage()];
+		}
 		$parser->setParser($data);
 		$desc = $parser->findText('.articleHeader > .articleHeaderTertiary span.metaBlock-data');
 		return empty($desc) ? "N/A" : $desc; 
@@ -71,7 +80,7 @@ class Scrape
 
 $scrape = new Scrape(new Utility);
 $request = $scrape->scrape();
-echo ($request) ? "Added Data To File" : "Failed Adding Data To File";
+print_r(($request) ? $request : "Failed Adding Data To File");
 //echo '<pre>' . print_r($request, true ) . '</pre>';
 exit(0);
 

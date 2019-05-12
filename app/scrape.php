@@ -20,11 +20,11 @@ class Scrape
 		$this->utility = $utility;
 		$this->counter = 0;
 		$this->baseUrl = env("BASE_URL");
-		$this->url = $this->baseUrl . env("START_URL");
 	}
 
 
-	public function scrape(){
+	public function scrape($start_url){
+		$this->url = $this->baseUrl.$start_url;
 		$parser = new Parser();
 		$continue = TRUE;
 		while ($continue) {

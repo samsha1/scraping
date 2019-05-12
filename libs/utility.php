@@ -18,7 +18,9 @@ class Utility
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		$response=curl_exec($curl);
+
 		$httpstatus=curl_getinfo($curl,CURLINFO_HTTP_CODE);
+
 		if($httpstatus!=200){
 			throw new InvalidHttpException(curl_error($curl),$httpstatus);
 		}

@@ -22,7 +22,7 @@ class Parser
 			$result[ 'email' ]    = $this->validateEmail($this->findText('.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .faaemail' ));
 			$result[ 'website' ]  = $this->findText( '.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .exLink' );
 			$result[ 'about' ]    = $this->findText( '.listingItem-extra > .pageMeta-item > p' );
-				$result[ 'imageUrl' ] = $this->getImageSource();
+				$result[ 'imageUrl' ] = $this->getImageSource('.listingItem-thumbnail img');
 				
 			return $this->filter($result);
 
@@ -40,8 +40,8 @@ class Parser
 		return $this->query->find($element);
 	}
 
-	public function getImageSource(){
-		foreach ($this->findElement('.listingItem-thumbnail img') as $image) {
+	public function getImageSource($element){
+		foreach ($this->findElement($element) as $image) {
 			return urldecode(pq($image)->attr('src'));
 		}
 		return "N/A";

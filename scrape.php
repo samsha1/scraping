@@ -1,4 +1,6 @@
 <?php
+namespace App\Scrapper;
+
 require_once __DIR__ .'/libs/utility.php';
 require_once __DIR__ .'/libs/parser.php';
 

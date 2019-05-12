@@ -63,7 +63,8 @@ class Scrape
 		$cleanUrl = preg_replace("/\/FindAnArchitect\//",$this->baseUrl,$parser->getLink( 'h3 > a' ));
 		$data = $this->utility->getContent($cleanUrl);
 		$parser->setParser($data);
-		return $parser->findText('.articleHeader > .articleHeaderTertiary span.metaBlock-data');
+		$desc = $parser->findText('.articleHeader > .articleHeaderTertiary span.metaBlock-data');
+		return empty($desc) ? "N/A" : $desc; 
 	}
 }
 

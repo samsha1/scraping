@@ -22,11 +22,9 @@ class Parser
 			$result[ 'email' ]    = $this->validateEmail($this->findText('.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .faaemail' ));
 			$result[ 'website' ]  = $this->findText( '.listingItem-details >.pageMeta > .pageMeta-col > .pageMeta-item > .exLink' );
 			$result[ 'about' ]    = $this->findText( '.listingItem-extra > .pageMeta-item > p' );
-			foreach ($this->findElement('.listingItem-thumbnail img') as $image) {
-				$result[ 'imageUrl' ]     = urldecode(pq($image)->attr('src'));
-			}
-
-			return $result;
+				$result[ 'imageUrl' ] = $this->getImageSource();
+				
+			return $this->filter($result);
 
 		}
 
@@ -42,6 +40,13 @@ class Parser
 		return $this->query->find($element);
 	}
 
+	public function getImageSource(){
+		foreach ($this->findElement('.listingItem-thumbnail img') as $image) {
+			return urldecode(pq($image)->attr('src'));
+		}
+		return "N/A";
+	}
+
 	private function validateTelephone($number) {
 
 	  	$numberOnly = preg_replace('/[^0-9]/', '', $number);
@@ -53,8 +58,15 @@ class Parser
 		return (preg_match("/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/", $email)) ? $email : "N/A";
 	}
 
+	public function filter($result){
 
+		$filter = array_map(function($value) {
+   			return empty($value) ? "N/A" : $value;
+		}, $result);
 
+		//print_r($filter);
+		return $filter;
+	}
 
 }
 

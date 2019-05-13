@@ -10,6 +10,8 @@ If you get any dom error, install php-dom with following command:
 
 Run the script with 'php scrape_job.php' command in your terminal.
 
+The csv data that is generated once the parse is done are separated with Semi-Colon (;).
+
 Starting URL: https://find-an-architect.architecture.com/FAAPractices.aspx?display=50
 
 Go through each of the pages here to collect the following information for each firm (where available).
